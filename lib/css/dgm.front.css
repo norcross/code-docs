@@ -1,0 +1,15 @@
+div.info-block-single {
+	margin: 0 0 20px;
+}
+
+div.info-block-single h3 {
+	margin: 0 0 12px;
+}
+
+div.doc-manager-output {
+	margin: 0 0 25px;
+}
+
+div.doc-manager-output pre {
+    border: none;
+}
