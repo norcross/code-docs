@@ -1,6 +1,6 @@
 <?php
 /*
-Plugin Name: Documentation Manager
+Plugin Name: Code Docs
 Plugin URI: http://andrewnorcross.com/plugins/documentation-manager/
 Description: Create a documentation setup for theme and plugin releases
 Version: 0.1
@@ -25,11 +25,11 @@ Author URI: http://andrewnorcross.com
     http://www.gravityhelp.com/documentation/page/Gform_column_input
 */
 
-if( !defined( 'DGM_BASE' ) )
-    define( 'DGM_BASE', plugin_basename(__FILE__) );
+if( !defined( 'CDM_BASE' ) )
+    define( 'CDM_BASE', plugin_basename(__FILE__) );
 
-if( !defined( 'DGM_VER' ) )
-    define( 'DGM_VER', '0.1' );
+if( !defined( 'CDM_VER' ) )
+    define( 'CDM_VER', '0.1' );
 
 
 // include my secondary files
@@ -37,11 +37,11 @@ require_once('lib/admin.php');
 require_once('lib/meta.php');
 require_once('lib/front.php');
 
-class Documentation_Manager_Base
+class Code_Docs_Core
 {
     /**
      * Static property to hold our singleton instance
-     * @var Documentation_Manager_Base
+     * @var Code_Docs_Core
      */
     static $instance = false;
 
@@ -50,7 +50,7 @@ class Documentation_Manager_Base
      * This is our constructor, which is private to force the use of
      * getInstance() to make this a Singleton
      *
-     * @return Documentation_Manager_Base
+     * @return Code_Docs_Core
      */
     private function __construct() {
         add_action      ( 'plugins_loaded',                             array( $this, 'textdomain'              )           );
@@ -65,7 +65,7 @@ class Documentation_Manager_Base
      * If an instance exists, this returns it.  If not, it creates one and
      * retuns it.
      *
-     * @return Documentation_Manager_Base
+     * @return Code_Docs_Core
      */
 
     public static function getInstance() {
@@ -78,34 +78,34 @@ class Documentation_Manager_Base
     /**
      * load textdomain
      *
-     * @return Documentation_Manager_Base
+     * @return Code_Docs_Core
      */
 
     public function textdomain() {
 
-        load_plugin_textdomain( 'dgm', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
+        load_plugin_textdomain( 'cdm', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
     }
 
     /**
      * show settings link on plugins page
      *
-     * @return Documentation_Manager_Base
+     * @return Code_Docs_Core
      */
 
     public function quick_link( $links, $file ) {
 
         static $this_plugin;
 
-        if (!$this_plugin) {
-            $this_plugin = plugin_basename(__FILE__);
+        if ( ! $this_plugin ) {
+            $this_plugin = plugin_basename( __FILE__ );
         }
 
         // check to make sure we are on the correct plugin
-        if ($file == $this_plugin) {
+        if ( $file == $this_plugin ) {
 
-            $settings_link  = '<a href="'.menu_page_url( 'documentation', 0 ).'">'. __('Settings', 'dgm').'</a>';
+            $settings_link  = '<a href="'.menu_page_url( 'documentation', 0 ).'">'. __( 'Settings', 'cdm' ).'</a>';
 
-            array_unshift($links, $settings_link);
+            array_unshift( $links, $settings_link );
         }
 
         return $links;
@@ -115,7 +115,7 @@ class Documentation_Manager_Base
     /**
      * our activation and deactivation hooks
      *
-     * @return Documentation_Manager_Base
+     * @return Code_Docs_Core
      */
 
     public function activate() {
@@ -134,4 +134,4 @@ class Documentation_Manager_Base
 
 
 // Instantiate our class
-$Documentation_Manager_Base = Documentation_Manager_Base::getInstance();
+$Code_Docs_Core = Code_Docs_Core::getInstance();

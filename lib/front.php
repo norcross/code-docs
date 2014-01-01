@@ -2,14 +2,14 @@
 /**
  * This is all the functionality related to display the code
  *
- * @return Documentation_Manager_Display
+ * @return Code_Docs_Front_End
  */
 
-class Documentation_Manager_Display
+class Code_Docs_Front_End
 {
     /**
      * Static property to hold our singleton instance
-     * @var Documentation_Manager_Display
+     * @var Code_Docs_Front_End
      */
     static $instance = false;
 
@@ -18,7 +18,7 @@ class Documentation_Manager_Display
      * This is our constructor, which is private to force the use of
      * getInstance() to make this a Singleton
      *
-     * @return Documentation_Manager_Display
+     * @return Code_Docs_Front_End
      */
 
     private function __construct() {
@@ -34,7 +34,7 @@ class Documentation_Manager_Display
      * If an instance exists, this returns it.  If not, it creates one and
      * retuns it.
      *
-     * @return Documentation_Manager_Display
+     * @return Code_Docs_Front_End
      */
 
     public static function getInstance() {
@@ -54,11 +54,11 @@ class Documentation_Manager_Display
 		// CSS
 		if ( is_singular( 'docs' ) ) :
 
-            wp_enqueue_style( 'prism', plugins_url('/css/prism.css', __FILE__), array(), DGM_VER, 'all' );
-        	wp_enqueue_style( 'dgm-front', plugins_url('/css/dgm.front.css', __FILE__), array(), DGM_VER, 'all' );
+            wp_enqueue_style( 'prism', plugins_url('/prism/prism.css', __FILE__), array(), CDM_VER, 'all' );
+        	wp_enqueue_style( 'cdm-front', plugins_url('/css/cdm.front.css', __FILE__), array(), CDM_VER, 'all' );
 
-            wp_enqueue_script( 'prism', plugins_url('/js/prism.js', __FILE__) , array(), DGM_VER, false );
-            wp_enqueue_script( 'dgm-front', plugins_url('/js/dgm.front.js', __FILE__) , array(), DGM_VER, true );
+            wp_enqueue_script( 'prism', plugins_url('/prism/prism.js', __FILE__) , array(), CDM_VER, false );
+            wp_enqueue_script( 'cdm-front', plugins_url('/js/cdm.front.js', __FILE__) , array(), CDM_VER, true );
 
 
 		endif;
@@ -68,7 +68,7 @@ class Documentation_Manager_Display
 	/**
 	 * remove the underscores from the actual title display, which can break responsive design
 	 *
-	 * @return Documentation_Manager_Display
+	 * @return Code_Docs_Front_End
 	 */
 
 	public function underscore_title( $title, $id ) {
@@ -85,13 +85,13 @@ class Documentation_Manager_Display
 	/**
 	 * call function for doc display on single item
 	 *
-	 * @return Documentation_Manager_Display
+	 * @return Code_Docs_Front_End
 	 */
 
 	public function display_single( $content ) {
 
 		// check for my post types
-		if ( !is_singular( 'docs' ) )
+		if ( ! is_singular( 'docs' ) )
 			return $content;
 
 		// get post-specific data
@@ -99,30 +99,35 @@ class Documentation_Manager_Display
 		$post_id	= $post->ID;
 
 		// get buttons from function
-		$infoblocks	= get_post_meta( $post_id, '_dgm_info', true );
 
-		if ( empty( $infoblocks ) )
+		$codeblocks	= get_post_meta( $post->ID, '_cdm_code', true );
+
+		if ( empty( $codeblocks ) )
 			return $content;
 
 		// Return ALL THE THINGS
-		$block 	= '';
+		$display 	= '';
 
-		foreach( $infoblocks as $info ) :
+		foreach( $codeblocks as $block ) :
+			if ( isset( $block['block'] ) && ! empty( $block['block'] ) ):
 
-			$header	= $info['header'];
-			$text	= $info['content'];
+				$syntax	= isset( $block['syntax'] ) ? esc_attr( $block['syntax'] ) : 'html';
 
-			$block	.= '<div class="info-block-single">';
-			$block	.= '<h3>'.$header.'</h3>';
-			$block	.= wpautop( $text );
-			$block	.= '</div>';
+				$display	.= '<div class="cdm-output">';
 
+				if ( isset( $block['intro'] ) && ! empty( $block['intro'] ) )
+					$display	.= wpautop( esc_attr( $block['intro'] ) );
+
+				$display	.= '<pre class="line-numbers"><code class="language-'.$syntax.'">';
+				$display	.= esc_attr( $block['block'] );
+				$display	.= '</code></pre>';
+				$display	.= '</div>';
+
+			endif;
 		endforeach;
 
-		// tweak the actual content itself
-		$content = '<div class="info-block-single"><h3>Description</h3>'.$content.'</div>';
 
-		return $content.$block;
+		return $content.$display;
 
 	}
 
@@ -130,7 +135,7 @@ class Documentation_Manager_Display
 	/**
 	 * cleanup the extra <p> tags
 	 *
-	 * @return Documentation_Manager_Display
+	 * @return Code_Docs_Front_End
 	 */
 
 	public function cleanup( $content ) {
@@ -150,7 +155,7 @@ class Documentation_Manager_Display
 	/**
 	 * shortcode for code block within content
 	 *
-	 * @return Documentation_Manager_Display
+	 * @return Code_Docs_Front_End
 	 */
 
 	//http://prismjs.com/examples.html
@@ -200,4 +205,4 @@ class Documentation_Manager_Display
 
 
 // Instantiate our class
-$Documentation_Manager_Display = Documentation_Manager_Display::getInstance();
+$Code_Docs_Front_End = Code_Docs_Front_End::getInstance();

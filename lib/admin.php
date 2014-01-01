@@ -2,14 +2,14 @@
 /**
  * This is all the functionality related to the back end of the site
  *
- * @return Documentation_Manager_Admin
+ * @return Code_Docs_Admin
  */
 
-class Documentation_Manager_Admin
+class Code_Docs_Admin
 {
 	/**
 	 * Static property to hold our singleton instance
-	 * @var Documentation_Manager_Admin
+	 * @var Code_Docs_Admin
 	 */
 	static $instance = false;
 
@@ -18,22 +18,23 @@ class Documentation_Manager_Admin
 	 * This is our constructor, which is private to force the use of
 	 * getInstance() to make this a Singleton
 	 *
-	 * @return Documentation_Manager_Admin
+	 * @return Code_Docs_Admin
 	 */
 	private function __construct() {
-		add_action      ( 'init',                                       array( $this, 'post_types'              )           );
-		add_action      ( 'admin_enqueue_scripts',                      array( $this, 'scripts_styles'          ),  10      );
-		add_action      ( 'manage_posts_custom_column',                 array( $this, 'display_columns'         ),  10, 2   );
-		add_action		( 'admin_menu',									array( $this, 'remove_ui_items'			) 			);
-		add_action		( 'restrict_manage_posts',						array( $this, 'sort_drops'				)           );
-		add_action		( 'admin_menu',									array( $this, 'sort_pages'				)			);
-		add_action		( 'wp_ajax_save_sort',							array( $this, 'save_sort'				) 			);
+		add_action		(	'init',										array(	$this,	'post_types'			)			);
+		add_action		(	'init',										array(	$this,	'taxonomies'			)			);
+		add_action      (	'admin_enqueue_scripts',					array(	$this,	'scripts_styles'		),	10		);
+//		add_action      (	'manage_posts_custom_column',				array(	$this,	'display_columns'		),  10, 2   );
+//		add_action		(	'admin_menu',								array(	$this,	'remove_ui_items'		)			);
+//		add_action		( 'restrict_manage_posts',						array(	$this, 'sort_drops'				)           );
+//		add_action		( 'admin_menu',									array(	$this, 'sort_pages'				)			);
+//		add_action		( 'wp_ajax_save_sort',							array(	$this, 'save_sort'				) 			);
 
-		add_filter		( 'post_link',									array( $this, 'docs_post_link'			),	10,	3	);
-		add_filter		( 'post_type_link',								array( $this, 'docs_post_link'			),	10,	3	);
-		add_filter		( 'term_link',									array( $this, 'docs_term_link'			),	10,	3	);
-		add_filter      ( 'enter_title_here',                           array( $this, 'title_field'             )           );
-		add_filter      ( 'manage_edit-docs_columns',					array( $this, 'docs_columns'			)           );
+		add_filter		(	'post_link',								array(	$this,	'docs_post_link'		),	10,	3	);
+		add_filter		(	'post_type_link',							array(	$this,	'docs_post_link'		),	10,	3	);
+		add_filter		(	'term_link',								array(	$this,	'docs_term_link'		),	10,	3	);
+		add_filter      (	'enter_title_here',							array(	$this,	'title_field'			)			);
+//		add_filter      ( 'manage_edit-docs_columns',					array( $this, 'docs_columns'			)           );
 
 	}
 
@@ -41,7 +42,7 @@ class Documentation_Manager_Admin
 	 * If an instance exists, this returns it.  If not, it creates one and
 	 * retuns it.
 	 *
-	 * @return Documentation_Manager_Admin
+	 * @return Code_Docs_Admin
 	 */
 
 	public static function getInstance() {
@@ -53,7 +54,7 @@ class Documentation_Manager_Admin
 	/**
 	 * Scripts and stylesheets
 	 *
-	 * @return Documentation_Manager_Admin
+	 * @return Code_Docs_Admin
 	 */
 
 	public function scripts_styles() {
@@ -62,10 +63,10 @@ class Documentation_Manager_Admin
 
 		if ( is_object($screen) && 'docs' == $screen->post_type ) :
 
-			wp_enqueue_style( 'dgm-admin', plugins_url('/css/dgm.admin.css', __FILE__), array(), DGM_VER, 'all' );
+			wp_enqueue_style( 'cdm-admin', plugins_url('/css/cdm.admin.css', __FILE__), array(), null, 'all' );
 
-			wp_enqueue_script('jquery-ui-sortable');
-			wp_enqueue_script( 'dgm-admin', plugins_url('/js/dgm.admin.js', __FILE__) , array('jquery'), DGM_VER, true );
+			wp_enqueue_script( 'jquery-ui-sortable' );
+			wp_enqueue_script( 'cdm-admin', plugins_url('/js/cdm.admin.js', __FILE__) , array('jquery'), CDM_VER, true );
 
 		endif;
 
@@ -74,7 +75,7 @@ class Documentation_Manager_Admin
 	/**
 	 * remove default metabox
 	 *
-	 * @return Documentation_Manager_Admin
+	 * @return Code_Docs_Admin
 	 */
 
 	public function remove_ui_items() {
@@ -85,7 +86,7 @@ class Documentation_Manager_Admin
 	/**
 	 * change title field for CPTs
 	 *
-	 * @return Documentation_Manager_Admin
+	 * @return Code_Docs_Admin
 	 */
 
 	public function title_field( $title ) {
@@ -101,20 +102,20 @@ class Documentation_Manager_Admin
 	/**
 	 * register and display columns
 	 *
-	 * @return Documentation_Manager_Admin
+	 * @return Code_Docs_Admin
 	 */
 
 	public function docs_columns( $columns ) {
 
 		// remove stuff
-		unset($columns['date']);
-		unset($columns['author']);
-		unset($columns['comments']);
-		unset($columns['featured']);
-		unset($columns['post_type']);
+		unset( $columns['date']			);
+		unset( $columns['author']		);
+		unset( $columns['comments']		);
+		unset( $columns['featured']		);
+		unset( $columns['post_type']	);
 
 		// now add the custom stuff
-		$columns['dgm-version']	= 'Version';
+		$columns['cdm-version']	= 'Version';
 
 		return $columns;
 
@@ -123,17 +124,17 @@ class Documentation_Manager_Admin
 	/**
 	 * Column mods
 	 *
-	 * @return Documentation_Manager_Admin
+	 * @return Code_Docs_Admin
 	 */
 
 	public function display_columns( $column, $post_id ) {
 
 		switch ( $column ) {
 
-		case 'dgm-version':
-			$data	= get_post_meta( $post_id, '_dgm_extra_info', true );
+		case 'cdm-version':
+			$data	= get_post_meta( $post_id, '_cdm_extra_info', true );
 			if ( isset( $data['version'] ) )
-				echo '<span class="dgm-version">'.$data['version'].'</span>';
+				echo '<span class="cdm-version">'.$data['version'].'</span>';
 
 			break;
 
@@ -144,78 +145,97 @@ class Documentation_Manager_Admin
 	}
 
 	/**
-	 * set up CPT and taxonomies
+	 * set up taxonomies
 	 *
-	 * @return Documentation_Manager_Admin
+	 * @return Code_Docs_Admin
+	 */
+
+	public function taxonomies() {
+
+		$labels	= array(
+			'name'							=> __( 'Types',								'cdm' ),
+			'singular_name'					=> __( 'Type',								'cdm' ),
+			'search_items'					=> __( 'Search Types',						'cdm' ),
+			'popular_items'					=> __( 'Popular Types',						'cdm' ),
+			'all_items'						=> __( 'All Types',							'cdm' ),
+			'parent_item'					=> __( 'Parent Type',						'cdm' ),
+			'parent_item_colon'				=> __( 'Parent Type:',						'cdm' ),
+			'edit_item'						=> __( 'Edit Type',							'cdm' ),
+			'update_item'					=> __( 'Update Type',						'cdm' ),
+			'add_new_item'					=> __( 'Add New Type',						'cdm' ),
+			'new_item_name'					=> __( 'New Type',							'cdm' ),
+			'add_or_remove_items'			=> __( 'Add or remove Types',				'cdm' ),
+			'choose_from_most_used'			=> __( 'Choose from the most used Types',	'cdm' ),
+			'separate_items_with_commas'	=> __( 'Separate Types with commas',		'cdm' ),
+		);
+
+		$args = array(
+			'labels'				=> $labels,
+			'public'				=> true,
+			'show_in_nav_menus'		=> true,
+			'show_ui'				=> true,
+			'publicly_queryable'	=> true,
+			'exclude_from_search'	=> false,
+			'hierarchical'			=> false,
+			'query_var'				=> true,
+			'show_admin_column'		=> true,
+			'rewrite'				=> array( 'slug' => '%post_type%', 'with_front' => false ),
+		);
+
+		$args = apply_filters( 'cdm_custom_taxonomy_args', $args );
+
+		register_taxonomy(
+			'doc-type',
+			'docs',
+			$args
+		);
+
+	}
+	/**
+	 * set up CPT
+	 *
+	 * @return Code_Docs_Admin
 	 */
 
 	public function post_types() {
-		register_taxonomy(
-			'doc-type',
-			array( 'docs' ),
-			array(
-				'public'				=> true,
-				'show_in_nav_menus'		=> true,
-				'show_ui'				=> true,
-				'publicly_queryable'	=> true,
-				'exclude_from_search'	=> false,
-				'hierarchical'			=> false,
-				'query_var'				=> true,
-				'show_admin_column'		=> true,
-				'rewrite'           	=> array( 'slug' => '%post_type%', 'with_front' => false ),
-				'labels'				=> array(
-					'name'							=> __('Types',								'dgm' ),
-					'singular_name'					=> __('Type',								'dgm' ),
-					'search_items'					=> __('Search Types',						'dgm' ),
-					'popular_items'					=> __('Popular Types',						'dgm' ),
-					'all_items'						=> __('All Types',							'dgm' ),
-					'parent_item'					=> __('Parent Type',						'dgm' ),
-					'parent_item_colon'				=> __('Parent Type:',						'dgm' ),
-					'edit_item'						=> __('Edit Type',							'dgm' ),
-					'update_item'					=> __('Update Type',						'dgm' ),
-					'add_new_item'					=> __('Add New Type',						'dgm' ),
-					'new_item_name'					=> __('New Type',							'dgm' ),
-					'add_or_remove_items'			=> __('Add or remove Types',				'dgm' ),
-					'choose_from_most_used'			=> __('Choose from the most used Types',	'dgm' ),
-					'separate_items_with_commas'	=> __('Separate Types with commas',			'dgm' ),
-				),
-			)
+
+		$labels	= array(
+			'name'					=> __( 'Documentation',				'cdm' ),
+			'singular_name'			=> __( 'Item',						'cdm' ),
+			'add_new'				=> __( 'Add New Item',				'cdm' ),
+			'add_new_item'			=> __( 'Add New Item',				'cdm' ),
+			'edit'					=> __( 'Edit Item',					'cdm' ),
+			'edit_item'				=> __( 'Edit Item',					'cdm' ),
+			'new_item'				=> __( 'New Item',					'cdm' ),
+			'view'					=> __( 'View Item',					'cdm' ),
+			'view_item'				=> __( 'View Item',					'cdm' ),
+			'search_items'			=> __( 'Search Items',				'cdm' ),
+			'not_found'				=> __( 'No Items found',			'cdm' ),
+			'not_found_in_trash'	=> __( 'No Items found in Trash',	'cdm' ),
 		);
-		register_post_type( 'docs',
-			array(
-				'labels'    => array(
-					'name'                  => __( 'Documentation',				'dgm' ),
-					'singular_name'         => __( 'Item',                     	'dgm' ),
-					'add_new'               => __( 'Add New Item',              'dgm' ),
-					'add_new_item'          => __( 'Add New Item',              'dgm' ),
-					'edit'                  => __( 'Edit Item',                 'dgm' ),
-					'edit_item'             => __( 'Edit Item',                 'dgm' ),
-					'new_item'              => __( 'New Item',                  'dgm' ),
-					'view'                  => __( 'View Item',                 'dgm' ),
-					'view_item'             => __( 'View Item',                 'dgm' ),
-					'search_items'          => __( 'Search Items',              'dgm' ),
-					'not_found'             => __( 'No Items found',            'dgm' ),
-					'not_found_in_trash'    => __( 'No Items found in Trash',   'dgm' ),
-				),
-				'public'    => true,
-					'show_in_menu'          => true,
-					'show_in_nav_menus'     => false,
-					'show_ui'               => true,
-					'publicly_queryable'    => true,
-					'exclude_from_search'   => false,
-				'hierarchical'      => false,
-				'menu_position'     => null,
-				'capability_type'   => 'post',
-				'taxonomies'		=> array( 'doc-type' ),
-				'query_var'         => true,
-				'menu_icon'         => plugins_url('/img/menu-docs.png', __FILE__),
-				'rewrite'           => array( 'slug' => 'docs/%doc-type%', 'with_front' => false ),
-				'has_archive'       => 'docs',
-				'supports'          => array( 'title', 'editor' ),
-			)
+
+		$args	= array(
+			'labels'				=> $labels,
+			'public'				=> true,
+			'show_in_menu'			=> true,
+			'show_in_nav_menus'		=> false,
+			'show_ui'				=> true,
+			'publicly_queryable'	=> true,
+			'exclude_from_search'	=> false,
+			'hierarchical'			=> false,
+			'menu_position'			=> null,
+			'capability_type'		=> 'post',
+			'taxonomies'			=> array( 'doc-type' ),
+			'query_var'				=> true,
+			'menu_icon'				=> 'dashicons-welcome-widgets-menus',
+			'rewrite'				=> array( 'slug' => 'docs/%doc-type%', 'with_front' => false ),
+			'has_archive'			=> 'docs',
+			'supports'				=> array( 'title', 'editor', 'excerpt' ),
 		);
-		// set taxonomy registration
-		register_taxonomy_for_object_type( 'docs', 'doc-type' );
+
+		$args = apply_filters( 'cdm_post_type_args', $args );
+
+		register_post_type( 'docs', $args );
 
 	}
 
@@ -223,7 +243,7 @@ class Documentation_Manager_Admin
 	/**
 	 * create dropdown for showing just flagged
 	 *
-	 * @return Documentation_Manager_Admin
+	 * @return Code_Docs_Admin
 	 */
 
 	public function sort_drops() {
@@ -253,7 +273,7 @@ class Documentation_Manager_Admin
 	/**
 	 * run filter on sorting
 	 *
-	 * @return Documentation_Manager_Admin
+	 * @return Code_Docs_Admin
 	 */
 
 	public function sort_filters( $vars ) {
@@ -277,9 +297,9 @@ class Documentation_Manager_Admin
 			'terms'		=> $_GET['doc-type']
 		);
 
-        $vars = array_merge( $vars, array(
-            'tax_query'	=> $tax_query
-        ));
+		$vars = array_merge( $vars, array(
+			'tax_query'	=> $tax_query
+		));
 
 		return $vars;
 
@@ -288,7 +308,7 @@ class Documentation_Manager_Admin
 	/**
 	 * include doc type taxonomy in URL
 	 *
-	 * @return Documentation_Manager_Admin
+	 * @return Code_Docs_Admin
 	 */
 
 	public function docs_post_link( $permalink, $post_id, $leavename ) {
@@ -316,7 +336,7 @@ class Documentation_Manager_Admin
 	/**
 	 * include doc type in taxonomy URL
 	 *
-	 * @return Documentation_Manager_Admin
+	 * @return Code_Docs_Admin
 	 */
 
 	public function docs_term_link( $term_link, $term, $taxonomy ) {
@@ -412,4 +432,4 @@ class Documentation_Manager_Admin
 
 
 // Instantiate our class
-$Documentation_Manager_Admin = Documentation_Manager_Admin::getInstance();
+$Code_Docs_Admin = Code_Docs_Admin::getInstance();
