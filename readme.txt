@@ -1,4 +1,4 @@
-=== Documentation Manager ===
+=== Code Docs ===
 Contributors: norcross
 Website Link: http://andrewnorcross.com/plugins/
 Donate link: https://andrewnorcross.com/donate
@@ -20,7 +20,7 @@ Create a documentation setup for theme and plugin releases
 
 This section describes how to install the plugin and get it working.
 
-1. Upload `documentation-manager` to the `/wp-content/plugins/` directory.
+1. Upload `code-docs` to the `/wp-content/plugins/` directory.
 2. Activate the plugin through the 'Plugins' menu in WordPress.
 
 == Frequently Asked Questions ==
