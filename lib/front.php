@@ -20,15 +20,14 @@ class Code_Docs_Front_End
      *
      * @return Code_Docs_Front_End
      */
-
     private function __construct() {
-		add_action      ( 'wp_enqueue_scripts',         array( $this, 'front_scripts'		),	10		);
-//		add_filter		( 'the_title',					array( $this, 'underscore_title'	),	10,	2	);
-		add_filter		( 'the_content',				array( $this, 'display_single'		),	7		);
-		add_filter		( 'the_content',				array( $this, 'cleanup'				),	10		);
-
-		add_shortcode	( 'codedoc',					array( $this, 'codedoc'				) 			);
+		add_action( 'wp_enqueue_scripts', array( $this, 'front_scripts' ), 10 );
+		//add_filter( 'the_title', array( $this, 'underscore_title' ), 10, 2 );
+		add_filter( 'the_content', array( $this, 'display_single' ), 7 );
+		add_filter( 'the_content', array( $this, 'cleanup' ), 10 );
+		add_shortcode( 'codedoc', array( $this, 'codedoc' ) );
     }
+
 
     /**
      * If an instance exists, this returns it.  If not, it creates one and
@@ -36,109 +35,101 @@ class Code_Docs_Front_End
      *
      * @return Code_Docs_Front_End
      */
-
     public static function getInstance() {
-        if ( !self::$instance )
+        if ( ! self::$instance )
             self::$instance = new self;
         return self::$instance;
     }
+
 
 	/**
 	 * Load CSS and JS files
 	 *
 	 * @return Reaktiv_Base
 	 */
-
 	public function front_scripts() {
-
-		// CSS
+		
+		// only load styles and scripts on docs singular
 		if ( is_singular( 'docs' ) ) :
-
-            wp_enqueue_style( 'prism', plugins_url('/prism/prism.css', __FILE__), array(), CDM_VER, 'all' );
-        	wp_enqueue_style( 'cdm-front', plugins_url('/css/cdm.front.css', __FILE__), array(), CDM_VER, 'all' );
-
-            wp_enqueue_script( 'prism', plugins_url('/prism/prism.js', __FILE__) , array(), CDM_VER, false );
-            wp_enqueue_script( 'cdm-front', plugins_url('/js/cdm.front.js', __FILE__) , array(), CDM_VER, true );
-
-
+            wp_enqueue_style( 'prism', plugins_url( '/prism/prism.css', __FILE__ ), array(), CDM_VER, 'all' );
+        	wp_enqueue_style( 'cdm-front', plugins_url( '/css/cdm.front.css', __FILE__ ), array(), CDM_VER, 'all' );
+            wp_enqueue_script( 'prism', plugins_url( '/prism/prism.js', __FILE__ ) , array(), CDM_VER, false );
+            wp_enqueue_script( 'cdm-front', plugins_url( '/js/cdm.front.js', __FILE__ ) , array(), CDM_VER, true );
 		endif;
-
 	}
+
 
 	/**
 	 * remove the underscores from the actual title display, which can break responsive design
 	 *
 	 * @return Code_Docs_Front_End
 	 */
-
 	public function underscore_title( $title, $id ) {
 
-		// bail on non-singulars
-	    if ( !is_singular( 'docs' ) )
+		// bail on non-docs
+	    if ( ! is_singular( 'docs' ) )
 	    	return $title;
 
-	    $title	= str_replace( '_', ' ', $title );
+	    $title = str_replace( '_', ' ', $title );
 
 	    return $title;
 	}
+
 
 	/**
 	 * call function for doc display on single item
 	 *
 	 * @return Code_Docs_Front_End
 	 */
-
 	public function display_single( $content ) {
 
-		// check for my post types
+		// bail on non-docs
 		if ( ! is_singular( 'docs' ) )
 			return $content;
 
 		// get post-specific data
 		global $post;
-		$post_id	= $post->ID;
+		$post_id = $post->ID;
 
-		// get buttons from function
-
+		// get code blocks
 		$codeblocks	= get_post_meta( $post->ID, '_cdm_code', true );
-
+		
+		// bail if no code blocks
 		if ( empty( $codeblocks ) )
 			return $content;
 
 		// Return ALL THE THINGS
-		$display 	= '';
+		$display = '';
 
 		foreach( $codeblocks as $block ) :
 			if ( isset( $block['block'] ) && ! empty( $block['block'] ) ):
-
+				
+				// Use HTML syntax if none selected
 				$syntax	= isset( $block['syntax'] ) ? esc_attr( $block['syntax'] ) : 'html';
 
-				$display	.= '<div class="cdm-output">';
+				$display .= '<div class="cdm-output">';
 
 				if ( isset( $block['intro'] ) && ! empty( $block['intro'] ) )
-					$display	.= wpautop( esc_attr( $block['intro'] ) );
+					$display .= wpautop( esc_attr( $block['intro'] ) );
 
-				$display	.= '<pre class="line-numbers"><code class="language-'.$syntax.'">';
-				$display	.= esc_attr( $block['block'] );
-				$display	.= '</code></pre>';
-				$display	.= '</div>';
-
+				$display .= '<pre class="line-numbers"><code class="language-' . $syntax . '">';
+				$display .= esc_attr( $block['block'] );
+				$display .= '</code></pre>';
+				$display .= '</div>';
 			endif;
 		endforeach;
 
-
-		return $content.$display;
-
+		return $content . $display;
 	}
 
 
 	/**
-	 * cleanup the extra <p> tags
+	 * cleanup the extra paragraph and break tags
 	 *
 	 * @return Code_Docs_Front_End
 	 */
-
 	public function cleanup( $content ) {
+	
 	    $array = array(
 	        '<p>['		=> '[',
 	        ']</p>' 	=> ']',
@@ -155,14 +146,13 @@ class Code_Docs_Front_End
 	/**
 	 * shortcode for code block within content
 	 *
+	 * http://prismjs.com/examples.html
+	 *
 	 * @return Code_Docs_Front_End
 	 */
-
-	//http://prismjs.com/examples.html
-
 	public function codedoc( $atts, $content = null ) {
 
-		extract(shortcode_atts( array(
+		extract( shortcode_atts( array(
 			'label'		=> '',
 		), $atts ) );
 
@@ -176,24 +166,21 @@ class Code_Docs_Front_End
 		if ( empty( $codeblocks ) )
 			return;
 
-		$display	= '';
+		$display = '';
 
 		foreach( $codeblocks as $code ) :
 
-			$code_type	= $code['type'];
+			$code_type = $code['type'];
 			$code_label = $code['label'];
-			$code_block	= $code['block'];
+			$code_block = $code['block'];
 
-			if ( !empty( $code_block ) && $label == $code_label ):
-
-				$display	.= '<div class="doc-manager-output">';
-				$display	.= '<pre class="line-numbers"><code class="language-'.$code_type.'">';
-				$display	.= esc_attr( $code_block );
-				$display	.= '</pre></code>';
-				$display	.= '</div>';
-
+			if ( ! empty( $code_block ) && $label == $code_label ) :
+				$display .= '<div class="doc-manager-output">';
+				$display .= '<pre class="line-numbers"><code class="language-' . $code_type . '">';
+				$display .= esc_attr( $code_block );
+				$display .= '</pre></code>';
+				$display .= '</div>';
 			endif;
-
 		endforeach;
 
 		// now send it all back
