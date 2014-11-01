@@ -34,8 +34,10 @@ class Code_Docs_Admin
 		add_filter( 'term_link', array( $this, 'docs_term_link'	), 10, 3 );
 		add_filter( 'enter_title_here', array( $this, 'title_field' ) );
 		add_filter( 'manage_edit-docs_columns', array( $this, 'docs_columns' ) );
+
+		register_activation_hook( __FILE__, 'flush_rewrite_rules' );
 	}
-	
+
 
 	/**
 	 * If an instance exists, this returns it.  If not, it creates one and
@@ -118,9 +120,9 @@ class Code_Docs_Admin
 	 * @return Code_Docs_Admin
 	 */
 	public function display_columns( $column, $post_id ) {
-	
+
 		$data = get_post_meta( $post_id, '_cdm_extra_info', true );
-		
+
 		if ( 'cdm-version' == $column && isset( $data['version'] ) ) :
 			echo '<span class="cdm-version">' . $data['version'] . '</span>';
 		endif;
@@ -303,7 +305,7 @@ class Code_Docs_Admin
 
 		// get taxonomy terms
 		$terms = wp_get_object_terms( $post->ID, 'doc-type' );
-		
+
 		if ( ! is_wp_error( $terms ) && ! empty( $terms ) && is_object( $terms[0] ) )
 			$taxonomy_slug = $terms[0]->slug;
 
@@ -379,7 +381,7 @@ class Code_Docs_Admin
 			$wpdb->update( $wpdb->posts, array( 'menu_order' => $count ), array( 'ID' => $item_id ) );
 			$count++;
 		endforeach;
-		
+
 		die( 1 );
 	}
 
